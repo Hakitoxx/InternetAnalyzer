@@ -1,76 +1,81 @@
 # Internet Analyzer
 
-A lightweight Python tool that monitors your internet connection in real-time, detects outages, and analyzes the root cause.
+A lightweight Python command-line tool for monitoring connectivity, recording latency, detecting outages, and running basic network diagnostics.
 
 ## Features
 
-- Real-time ping monitoring (Google DNS / Cloudflare DNS)
-- Automatic outage detection with root cause analysis
-- Gateway, DNS, and HTTP health checks
-- Color-coded latency display
-- Summary reports every 5 minutes
-- Logs and JSON data export
-- Works on Windows and Linux
+- Continuous ping monitoring
+- Primary and secondary connectivity checks
+- Automatic default-gateway detection
+- DNS resolution checks
+- HTTP connectivity checks
+- Basic outage diagnostics
+- Uptime and latency statistics
+- Timestamped event logging
+- JSON session-data export
+- Windows and Linux support
+- No third-party Python dependencies
+
+## How It Works
+
+The analyzer monitors an external target at regular intervals. After repeated failures, it performs additional checks against the local gateway, DNS resolution, a secondary external target, and HTTP connectivity.
+
+```text
+Connectivity monitor
+        |
+        +--> Primary target
+        +--> Local gateway
+        +--> DNS resolution
+        +--> Secondary target
+        +--> HTTP check
+        +--> Diagnostic summary
+```
+
+The diagnostic messages are observations intended to help troubleshoot a connection problem. They are not guaranteed to identify the actual root cause of an outage.
+
+## Requirements
+
+- Python 3.7+
+- Windows or Linux
+- Standard Python library only
 
 ## Usage
-
-### Run directly with Python
 
 ```bash
 python internet_analyzer.py
 ```
 
-### Run via batch file (Windows)
-
-Double-click `run.bat` or run it from terminal:
-
-```bash
+On Windows, if `run.bat` is present:
+```bat
 run.bat
 ```
 
-## Sample Output
+Press `Ctrl+C` to stop the analyzer. The program writes a final summary and saves session data when it exits.
 
-```
-  +----------------------------------------------------+
-  |          INTERNET CONNECTION ANALYZER               |
-  |          Press Ctrl+C to stop                       |
-  +----------------------------------------------------+
+## Configuration
 
-  14:32:01 [OK]    12.3 ms
-  14:32:06 [OK]    14.1 ms
-  14:32:11 [OK]    11.8 ms
-  14:32:16 [XX]   TIMEOUT
+The main settings are defined near the top of `internet_analyzer.py`:
 
-  !!! CONNECTION LOST - 2025-01-15 14:32:16 !!!
-
-    > Gateway unreachable - Router issue or local network disconnected
-    > DNS resolution FAILED - DNS server issue or ISP DNS block
-    > ROOT CAUSE: Router needs restart or Ethernet cable check
+```python
+PING_HOST = "8.8.8.8"
+PING_HOST_SECONDARY = "1.1.1.1"
+PING_INTERVAL = 5
+SUMMARY_INTERVAL = 300
 ```
 
 ## Output Files
 
 | File | Description |
-|------|-------------|
-| `connection_log.txt` | Timestamped event log |
-| `analyzer_data.json` | JSON export of session data |
+|---|---|
+| `connection_log.txt` | Timestamped analyzer and outage events |
+| `analyzer_data.json` | Session statistics and recorded downtime events |
 
-## Configuration
+## Important Notes
 
-Edit the top of `internet_analyzer.py` to change settings:
+The analyzer relies on external services for connectivity checks. A failed ping or HTTP request can be caused by filtering, firewall rules, routing problems, a temporary service issue, or the target itself being unreachable.
 
-```python
-PING_HOST = "8.8.8.8"          # Primary ping target
-PING_HOST_SECONDARY = "1.1.1.1" # Secondary ping target
-PING_INTERVAL = 5               # Seconds between pings
-SUMMARY_INTERVAL = 300          # Seconds between summary reports
-```
-
-## Requirements
-
-- Python 3.7+
-- No external dependencies (uses only standard library)
+For that reason, the diagnostic result should be treated as a troubleshooting aid rather than a definitive root-cause determination.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for the full license text.
